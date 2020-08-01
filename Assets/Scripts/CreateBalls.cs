@@ -8,7 +8,7 @@ public class CreateBalls : MonoBehaviour
     public GameObject prefab;
     public GameObject[] ballsArr;
 
-    public int N = 100;                 //nUMBER OF PARTICLES
+    public int N = 500;                 //nUMBER OF PARTICLES
     public float ballRadius = 0.2f;
 
     public float h = 0.2f;              // Particle radius (or smoothing radius?)
@@ -22,20 +22,20 @@ public class CreateBalls : MonoBehaviour
 
     // Resistance to compression
     // speed of sound = sqrt(k / rho0)
-    private int k = 30;                 // Bulk modulus (1000)   k = 30
+    public int k = 30;                 // Bulk modulus (1000)   k = 30
 
     private float gravity = -9.8f;
-    private float mu = 3;               //viscosity (0.1)
+    public float mu = 10;               //viscosity (0.1)
     private float[] rho;                //Density
     private float rho0 = 1000;          // Reference density    
     private float rho02;                // Reference density times 2
     private float mass;                 //particle mass    
-    private float dt = 0.0008f;  //18e-4f
+    public float dt = 0.008f;  //18e-4f
     private float dt2;
     public float restitution = 0.95f;  // Coefficient of restitution for boundaries
 
-    private float Cp;
-    private float Cv;
+    public float Cp;
+    public float Cv;
     private float C0, C1, C2;
 
     //Boundaries
