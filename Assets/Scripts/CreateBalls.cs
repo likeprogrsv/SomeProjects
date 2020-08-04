@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CreateBalls : MonoBehaviour
 {
-    
+
     public GameObject prefab;
     public GameObject[] ballsArr;
 
@@ -13,9 +13,9 @@ public class CreateBalls : MonoBehaviour
 
     public float h = 0.2f;              // Particle radius (or smoothing radius?)
     private float h2, h4, h8;           // Radius squared, radius to the 4, radius to the 8
-       
+
     //Vector2d positions, velocities, accelerations of particles. X and Y coordinate
-    private Vector2[] position; 
+    private Vector2[] position;
     private Vector2[] velocity;
     private Vector2[] velocityHalf;
     private Vector2[] acceleration;
@@ -30,7 +30,9 @@ public class CreateBalls : MonoBehaviour
     private float rho0 = 1000;          // Reference density    
     private float rho02;                // Reference density times 2
     private float mass;                 //particle mass    
-    public float dt = 0.008f;  //18e-4f
+
+    public float fixedTime = 0.003f;
+    private float dt;  //18e-4f
     private float dt2;
     public float restitution = 0.95f;  // Coefficient of restitution for boundaries
 
@@ -53,7 +55,7 @@ public class CreateBalls : MonoBehaviour
         velocity = new Vector2[N];
         velocityHalf = new Vector2[N];
         acceleration = new Vector2[N];
-        rho = new float[N];        
+        rho = new float[N];
     }
 
     public void computeDependentVariables()
@@ -64,15 +66,16 @@ public class CreateBalls : MonoBehaviour
         rho02 = rho0 * 2;       // Reference density times 2
         Cp = 15 * k;            // a part of acceleration formula calculation
         Cv = -40 * mu;          // a part of acceleration formula calculation   
+        dt = Time.fixedDeltaTime;
         dt2 = dt / 2;
-        edge1 = ballRadius/2 + (-4.77f);   //-+4.77 is a left and right wall coordinates of x-axis
-        edge2 = 4.77f - ballRadius/2;
-        edge3 = ballRadius/2 + (-3.48f);         // floor coordinate of y-axis
+        edge1 = ballRadius / 2 + (-4.77f);   //-+4.77 is a left and right wall coordinates of x-axis
+        edge2 = 4.77f - ballRadius / 2;
+        edge3 = ballRadius / 2 + (-3.48f);         // floor coordinate of y-axis
     }
 
     public void randomInit()
     {
-        for (int i=0; i < N; i++)
+        for (int i = 0; i < N; i++)
         {
             //Initialize particle positions
             position[i].x = Random.Range(h, 0.25f);
@@ -86,12 +89,12 @@ public class CreateBalls : MonoBehaviour
         float xp = y1;
         float r = ballRadius;
 
-        for (int i=0; i<N; i++)
+        for (int i = 0; i < N; i++)
         {
             //Initialize particle positions
             position[i].x = xp;
             position[i].y = yp;
-            xp += r;            
+            xp += r;
 
             if (xp > y2)
             {
@@ -100,20 +103,20 @@ public class CreateBalls : MonoBehaviour
             }
 
             velocity[i].x = Random.Range(-0.02f, 0.02f);
-            velocity[i].y = Random.Range(-0.02f, 0.02f);            
+            velocity[i].y = Random.Range(-0.02f, 0.02f);
         }
     }
 
-    
+
     public void computeDensities()
     {
         // Find new densities        
         float dx, dy, r2, z, rho_ij;
-        float C1 = 4 * mass / (Mathf.PI * h2);  
-        float C2 = 4 * mass / (Mathf.PI * h8); 
+        float C1 = 4 * mass / (Mathf.PI * h2);
+        float C2 = 4 * mass / (Mathf.PI * h8);
 
         //Initialise densities
-        for (int i = N-1; i >= 0; i--)      // N - number of particles, i - index of "rho" array (index begins from zero),    
+        for (int i = N - 1; i >= 0; i--)      // N - number of particles, i - index of "rho" array (index begins from zero),    
         {                                   //  that's why i=N-1 
             rho[i] = C1;
         }
@@ -135,7 +138,7 @@ public class CreateBalls : MonoBehaviour
                     rho_ij = C2 * z * z * z;
                     rho[i] += rho_ij;
                     rho[j] += rho_ij;
-                }              
+                }
             }
         }
 
@@ -166,12 +169,12 @@ public class CreateBalls : MonoBehaviour
             Debug.Log(rho2s);
         }
             */
-            mass = rho0 * rhos / rho2s;
+        mass = rho0 * rhos / rho2s;
         // Constants for interaction term
         C0 = mass / (Mathf.PI * h4);
         C1 = 4 * mass / (Mathf.PI * h2);
         C2 = 4 * mass / (Mathf.PI * h8);
-        
+
     }
 
     public void computeAccelerations()
@@ -182,21 +185,21 @@ public class CreateBalls : MonoBehaviour
         for (int i = N - 1; i >= 0; i--)
         {
             acceleration[i].x = 0;
-            acceleration[i].y = gravity;                    
+            acceleration[i].y = gravity;
         }
 
-        
+
         //Find new densities
         float dx, dy, r2, rhoi, rhoj, q, u, w0, wp, wv, dvx, dvy;
 
         for (int i = N - 1; i >= 0; i--)
         {
-            rhoi = rho[i];  
-            for ( int j = i - 1; j >= 0; j--)
+            rhoi = rho[i];
+            for (int j = i - 1; j >= 0; j--)
             {
                 dx = position[i].x - position[j].x;
                 dy = position[i].y - position[j].y;
-                r2 = dx * dx + dy * dy;     
+                r2 = dx * dx + dy * dy;
 
                 if (r2 < h2)
                 {
@@ -226,7 +229,7 @@ public class CreateBalls : MonoBehaviour
                 }
 
             }
-        }               
+        }
     }
 
     public void leapfrogInit()
@@ -271,7 +274,7 @@ public class CreateBalls : MonoBehaviour
             {
                 position[i].x = edge1;
                 velocity[i].x *= -restitution;
-                velocityHalf[i].x *= -restitution;                
+                velocityHalf[i].x *= -restitution;
             }
             else if (position[i].x > edge2)
             {
@@ -321,7 +324,7 @@ public class CreateBalls : MonoBehaviour
 
         collisions = collisionsList.ToArray();              //Transform List to float array
 
-        
+
         //Calculate densities
         float rho_ij, z;
         for (int i = collisions.Length - 1; i >= 0; i--)
@@ -365,18 +368,18 @@ public class CreateBalls : MonoBehaviour
 
     public void createBalls()
     {
-        
+
         ballsArr = new GameObject[N];
         for (int i = N - 1; i >= 0; i--)
         {
             GameObject balls = Instantiate(prefab, new Vector3(position[i].x, position[i].y, 0), Quaternion.identity) as GameObject;
-            ballSize(balls);    
+            ballSize(balls);
             //go.transform.localScale = Vector3.one;
             ballsArr[i] = balls;
         }
     }
 
-    
+
     public void ballSize(GameObject currentBall)
     {
         RectTransform rt = currentBall.GetComponent<RectTransform>();
@@ -413,24 +416,38 @@ public class CreateBalls : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 30;       //applying the target 30 frame per second
+        Time.fixedDeltaTime = fixedTime;        
         initialiseSystem();
     }
+
+    void FixedUpdate()      //update calculations every "fixedTime" instead of every frame in Update() method
+    {       
+        updateParticles();
+        leapfrogStep();        
+    }
+
+
+
 
     // Update is called once per frame
     void Update()
     {
-        updateParticles();
-        leapfrogStep();
-        
 
+        //Update balls positions every frame
 
-
-        //Update balls positions 
-        for (int i = N - 1; i >=0; i--)
+        for (int i = N - 1; i >= 0; i--)
         {
             ballsArr[i].transform.position = position[i];
         }
-        
+
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
+
+
+        /*
         //create balls by clicking mouse
         if (Input.GetMouseButtonDown(0))
         {
@@ -444,9 +461,9 @@ public class CreateBalls : MonoBehaviour
                 Debug.Log(hit.collider.name);
                 Debug.Log("X " + Input.mousePosition.x + ";" + "Y " + Input.mousePosition.y);
                 Debug.Log("X " + worldPoint.x + ";" + "Y " + worldPoint.y);
-                */
+                
             }
         }
-        
+        */
     }
 }

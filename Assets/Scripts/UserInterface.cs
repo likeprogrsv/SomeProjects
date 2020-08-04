@@ -22,7 +22,7 @@ public class UserInterface : MonoBehaviour
     {
                 
         AmountSlider.minValue = 5;
-        AmountSlider.maxValue = 1000;
+        AmountSlider.maxValue = 1500;
         AmountSlider.value = mainScript.N;
         AmountText.text = mainScript.N.ToString();
         AmountSlider.onValueChanged.AddListener(delegate { ChangeAmount();});
